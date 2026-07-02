@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐢 CodeBlocks Junior</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #4fc3f7;
+    --grass: #66bb6a;
+    --sun: #ffca28;
+    --coral: #ff7043;
+    --violet: #7c4dff;
+    --pink: #f06292;
+    --bg: #e8f5e9;
+    --panel: #ffffff;
+    --shadow: 0 4px 16px rgba(0,0,0,0.12);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #7c4dff, #4fc3f7);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 3px 12px rgba(124,77,255,0.3);
+  }
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    color: white;
+    font-size: 28px;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+  }
+  header .subtitle {
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .emoji-big { font-size: 34px; }
+
+  /* LAYOUT */
+  .app {
+    display: grid;
+    grid-template-columns: 200px 1fr 300px;
+    grid-template-rows: 1fr auto;
+    height: calc(100vh - 66px);
+    gap: 0;
+  }
+
+  /* PALETTE */
+  .palette {
+    background: #fff8f0;
+    border-right: 3px solid #ffe0b2;
+    padding: 14px 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .palette h2 {
+    font-family: 'Fredoka One', cursive;
+    color: #bf360c;
+    font-size: 15px;
+    text-align: center;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .block-template {
+    border-radius: 12px;
+    padding: 10px 12px;
+    cursor: grab;
+    font-weight: 800;
+    font-size: 13px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.18);
+    user-select: none;
+    transition: transform 0.1s, box-shadow 0.1s;
+    border: none;
+    width: 100%;
+    text-align: left;
+  }
+  .block-template:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0,0,0,0.18); }
+  .block-template:active { transform: translateY(1px); box-shadow: 0 2px 0 rgba(0,0,0,0.18); cursor: grabbing; }
+
+  .b-move    { background: linear-gradient(135deg, #26a69a, #00897b); }
+  .b-turn    { background: linear-gradient(135deg, #42a5f5, #1976d2); }
+  .b-repeat  { background: linear-gradient(135deg, #ff7043, #e64a19); }
+  .b-if      { background: linear-gradient(135deg, #ab47bc, #7b1fa2); }
+  .b-wait    { background: linear-gradient(135deg, #78909c, #546e7a); }
+  .b-sound   { background: linear-gradient(135deg, #ec407a, #c2185b); }
+  .b-color   { background: linear-gradient(135deg, #ffca28, #f9a825); color: #333 !important; }
+  .b-say     { background: linear-gradient(135deg, #66bb6a, #388e3c); }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 4px 2px;
+    border-top: 2px dashed #ffe0b2;
+    margin-top: 4px;
+  }
+
+  /* WORKSPACE */
+  .workspace-area {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .workspace-toolbar {
+    background: #fff3e0;
+    border-bottom: 2px solid #ffe0b2;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .workspace-toolbar h2 {
+    font-family: 'Fredoka One', cursive;
+    color: #e65100;
+    font-size: 15px;
+  }
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.15); }
+  .btn-run  { background: #4caf50; color: white; }
+  .btn-stop { background: #f44336; color: white; }
+  .btn-clear { background: #9e9e9e; color: white; }
+  .btn-example { background: #7c4dff; color: white; }
+  .speed-wrap { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #555; margin-left: auto; }
+  .speed-wrap input { width: 90px; }
+
+  .workspace {
+    flex: 1;
+    background: repeating-linear-gradient(0deg, transparent, transparent 31px, #f0f0f0 31px, #f0f0f0 32px),
+                repeating-linear-gradient(90deg, transparent, transparent 31px, #f0f0f0 31px, #f0f0f0 32px);
+    background-size: 32px 32px;
+    overflow-y: auto;
+    padding: 16px;
+    position: relative;
+  }
+  .drop-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #ccc;
+    font-size: 15px;
+    font-weight: 700;
+    pointer-events: none;
+  }
+  .drop-hint .big { font-size: 48px; }
+
+  /* BLOCKS IN WORKSPACE */
+  #block-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 100px;
+  }
+  .ws-block {
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-weight: 800;
+    font-size: 14px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.18);
+    cursor: grab;
+    position: relative;
+    animation: blockIn 0.2s ease;
+    user-select: none;
+    flex-wrap: wrap;
+  }
+  @keyframes blockIn {
+    from { transform: scale(0.85) translateY(-10px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .ws-block input[type=number], .ws-block select {
+    width: 52px;
+    border-radius: 8px;
+    border: none;
+    padding: 3px 6px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    outline: none;
+  }
+  .ws-block select { width: auto; }
+  .ws-block .del-btn {
+    margin-left: auto;
+    background: rgba(0,0,0,0.2);
+    border: none;
+    border-radius: 50%;
+    width: 22px; height: 22px;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .ws-block .del-btn:hover { background: rgba(0,0,0,0.4); }
+  .ws-block.active-block { outline: 3px solid #fff176; outline-offset: 2px; }
+
+  /* nested blocks (repeat/if body) */
+  .nested-zone {
+    width: 100%;
+    margin-top: 6px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 8px 10px;
+    border: 2px dashed rgba(255,255,255,0.4);
+    min-height: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .nested-zone .ws-block { font-size: 13px; padding: 7px 10px; }
+  .nested-label { font-size: 10px; opacity: 0.75; margin-bottom: 2px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .add-inner-btn {
+    background: rgba(255,255,255,0.25);
+    border: 2px dashed rgba(255,255,255,0.5);
+    border-radius: 8px;
+    color: white;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    width: fit-content;
+  }
+  .add-inner-btn:hover { background: rgba(255,255,255,0.35); }
+
+  /* STAGE */
+  .stage-area {
+    background: #e3f2fd;
+    border-left: 3px solid #b3e5fc;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .stage-header {
+    background: #0288d1;
+    color: white;
+    padding: 8px 14px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  canvas#stage {
+    background: white;
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    max-height: 280px;
+    object-fit: contain;
+  }
+  .stage-canvas-wrap {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+  }
+  canvas#stage { border-radius: 10px; box-shadow: var(--shadow); }
+
+  .console {
+    flex: 1;
+    background: #1a1a2e;
+    color: #a5d6a7;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 10px 12px;
+    overflow-y: auto;
+    min-height: 80px;
+    border-top: 2px solid #0d47a1;
+  }
+  .console .log-line { padding: 1px 0; }
+  .console .log-err  { color: #ef9a9a; }
+  .console .log-info { color: #80deea; }
+  .console .log-say  { color: #fff176; font-weight: bold; }
+
+  /* speech bubble */
+  #speech-bubble {
+    position: absolute;
+    background: white;
+    border: 3px solid #333;
+    border-radius: 14px;
+    padding: 6px 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: #333;
+    pointer-events: none;
+    display: none;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 10;
+  }
+
+  /* FOOTER */
+  .footer-bar {
+    grid-column: 1/-1;
+    background: #f3e5f5;
+    border-top: 2px solid #ce93d8;
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6a1b9a;
+  }
+  .footer-bar .status { margin-left: auto; }
+  .challenge-badge {
+    background: linear-gradient(135deg, #f06292, #e91e63);
+    color: white;
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 11px;
+  }
+
+  /* drag over */
+  .drag-over { background: rgba(124,77,255,0.1) !important; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="emoji-big">🐢</span>
+  <div>
+    <h1>CodeBlocks Junior</h1>
+    <div class="subtitle">Impara a programmare con i blocchi!</div>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- PALETTE -->
+  <div class="palette">
+    <h2>🧩 Blocchi</h2>
+
+    <div class="section-label">Movimento</div>
+    <button class="block-template b-move" draggable="true" data-type="move">➡️ Avanza <span style="opacity:.7;font-size:11px">passi</span></button>
+    <button class="block-template b-turn" draggable="true" data-type="turnL">↺ Gira sinistra</button>
+    <button class="block-template b-turn" draggable="true" data-type="turnR">↻ Gira destra</button>
+    <button class="block-template b-turn" draggable="true" data-type="home">🏠 Torna al centro</button>
+
+    <div class="section-label">Aspetto</div>
+    <button class="block-template b-color" draggable="true" data-type="color">🎨 Colore penna</button>
+    <button class="block-template b-say" draggable="true" data-type="say">💬 Dì qualcosa</button>
+
+    <div class="section-label">Controllo</div>
+    <button class="block-template b-repeat" draggable="true" data-type="repeat">🔁 Ripeti</button>
+    <button class="block-template b-if" draggable="true" data-type="if">❓ Se... allora</button>
+    <button class="block-template b-wait" draggable="true" data-type="wait">⏳ Aspetta</button>
+  </div>
+
+  <!-- WORKSPACE -->
+  <div class="workspace-area">
+    <div class="workspace-toolbar">
+      <h2>📋 Il mio programma</h2>
+      <button class="btn btn-run" onclick="runProgram()">▶️ Esegui</button>
+      <button class="btn btn-stop" onclick="stopProgram()">⏹ Stop</button>
+      <button class="btn btn-clear" onclick="clearWorkspace()">🗑 Pulisci</button>
+      <button class="btn btn-example" onclick="loadExample()">💡 Esempio</button>
+      <div class="speed-wrap">
+        🐢 <input type="range" id="speed-slider" min="50" max="800" value="350" style="accent-color:#7c4dff">
+        🐇
+      </div>
+    </div>
+    <div class="workspace" id="workspace-drop">
+      <div class="drop-hint" id="drop-hint">
+        <div class="big">👆</div>
+        Trascina i blocchi qui!<br>
+        <span style="font-size:12px;color:#bbb">Oppure clicca un blocco dalla lista</span>
+      </div>
+      <div id="block-list"></div>
+    </div>
+  </div>
+
+  <!-- STAGE -->
+  <div class="stage-area">
+    <div class="stage-header">🖼 Palcoscenico</div>
+    <div class="stage-canvas-wrap" style="position:relative">
+      <canvas id="stage" width="260" height="260"></canvas>
+      <div id="speech-bubble"></div>
+    </div>
+    <div class="console" id="console">
+      <div class="log-line log-info">✨ Premi ▶️ Esegui per iniziare!</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-bar">
+    <span>📚 Classe 4ª–5ª</span>
+    <span class="challenge-badge">🏆 Sfida: disegna un quadrato!</span>
+    <span class="status" id="status-bar">Pronto</span>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+let blocks = [];
+let blockId = 0;
+let isRunning = false;
+let stopFlag = false;
+
+// ========== CANVAS ==========
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+let turtle = { x: 130, y: 130, angle: 0, penColor: '#7c4dff', penDown: true };
+
+function clearCanvas() {
+  ctx.clearRect(0,0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fafafa';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  // grid dots
+  ctx.fillStyle = '#e0e0e0';
+  for(let x=20;x<canvas.width;x+=20) for(let y=20;y<canvas.height;y+=20)
+    ctx.fillRect(x,y,1.5,1.5);
+  drawTurtle();
+}
+
+function drawTurtle() {
+  const {x, y, angle} = turtle;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate((angle * Math.PI) / 180);
+  // body
+  ctx.beginPath();
+  ctx.arc(0, 0, 11, 0, Math.PI * 2);
+  ctx.fillStyle = '#66bb6a';
+  ctx.fill();
+  ctx.strokeStyle = '#388e3c';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // head
+  ctx.beginPath();
+  ctx.arc(13, 0, 6, 0, Math.PI * 2);
+  ctx.fillStyle = '#81c784';
+  ctx.fill();
+  ctx.stroke();
+  // arrow
+  ctx.beginPath();
+  ctx.moveTo(16, 0);
+  ctx.lineTo(21, -4);
+  ctx.lineTo(21, 4);
+  ctx.closePath();
+  ctx.fillStyle = '#fff176';
+  ctx.fill();
+  ctx.restore();
+}
+
+function moveTurtle(steps) {
+  const radians = (turtle.angle * Math.PI) / 180;
+  const newX = turtle.x + steps * Math.cos(radians);
+  const newY = turtle.y + steps * Math.sin(radians);
+  if (turtle.penDown) {
+    ctx.beginPath();
+    ctx.moveTo(turtle.x, turtle.y);
+    ctx.lineTo(newX, newY);
+    ctx.strokeStyle = turtle.penColor;
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+  turtle.x = newX;
+  turtle.y = newY;
+  drawTurtle();
+}
+
+function rotateTurtle(deg) {
+  turtle.angle += deg;
+}
+
+function homePosition() {
+  turtle = { ...turtle, x: 130, y: 130, angle: 0 };
+  drawTurtle();
+}
+
+const COLORS = {
+  'viola': '#7c4dff',
+  'rosso': '#f44336',
+  'blu': '#1565c0',
+  'verde': '#388e3c',
+  'arancio': '#ff6f00',
+  'rosa': '#e91e63',
+  'nero': '#212121'
+};
+
+clearCanvas();
+
+// ========== SPEECH BUBBLE ==========
+function showSpeech(text, duration) {
+  const bubble = document.getElementById('speech-bubble');
+  const wrap = document.querySelector('.stage-canvas-wrap');
+  const rect = canvas.getBoundingClientRect();
+  const wrapRect = wrap.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const bx = (turtle.x / scaleX) + rect.left - wrapRect.left;
+  const by = (turtle.y / scaleY) + rect.top - wrapRect.top;
+  bubble.textContent = text;
+  bubble.style.display = 'block';
+  bubble.style.left = (bx + 15) + 'px';
+  bubble.style.top = (by - 35) + 'px';
+  return new Promise(r => setTimeout(() => { bubble.style.display='none'; r(); }, duration));
+}
+
+// ========== CONSOLE ==========
+function log(msg, cls='') {
+  const c = document.getElementById('console');
+  const d = document.createElement('div');
+  d.className = 'log-line ' + cls;
+  d.textContent = msg;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+function clearConsole() {
+  document.getElementById('console').innerHTML = '';
+}
+
+// ========== BLOCKS DATA ==========
+const blockDefs = {
+  move:   { color: '#26a69a', label: '➡️ Avanza', hasNum: true, numLabel: 'passi', default: 50 },
+  turnL:  { color: '#42a5f5', label: '↺ Gira sinistra', hasNum: true, numLabel: '°', default: 90 },
+  turnR:  { color: '#42a5f5', label: '↻ Gira destra', hasNum: true, numLabel: '°', default: 90 },
+  home:   { color: '#26a69a', label: '🏠 Torna al centro' },
+  color:  { color: '#ffca28', label: '🎨 Colore', hasSelect: true, options: Object.keys(COLORS), textColor: '#333' },
+  say:    { color: '#66bb6a', label: '💬 Dì:', hasText: true, default: 'Ciao!' },
+  repeat: { color: '#ff7043', label: '🔁 Ripeti', hasNum: true, numLabel: 'volte', default: 4, hasBody: true },
+  if:     { color: '#ab47bc', label: '❓ Se il colore è', hasSelect: true, options: Object.keys(COLORS), hasBody: true, textColor: 'white' },
+  wait:   { color: '#78909c', label: '⏳ Aspetta', hasNum: true, numLabel: 'sec', default: 1 },
+};
+
+// ========== BLOCK DOM ==========
+function createBlockEl(block, nested=false) {
+  const def = blockDefs[block.type];
+  const el = document.createElement('div');
+  el.className = 'ws-block' + (nested ? '' : '');
+  el.style.background = `linear-gradient(135deg, ${def.color}, ${adjustColor(def.color,-20)})`;
+  if (def.textColor) el.style.color = def.textColor;
+  el.dataset.id = block.id;
+
+  let html = `<span>${def.label}</span>`;
+  if (def.hasNum) {
+    html += `<input type="number" value="${block.val ?? def.default}" min="1" max="999" data-field="val">`;
+    html += `<span>${def.numLabel}</span>`;
+  }
+  if (def.hasText) {
+    html += `<input type="text" value="${block.text ?? def.default}" data-field="text" style="width:90px;border-radius:8px;border:none;padding:3px 6px;font-family:Nunito,sans-serif;font-weight:700;font-size:13px;background:rgba(255,255,255,0.9);color:#333">`;
+  }
+  if (def.hasSelect) {
+    html += `<select data-field="select" style="border-radius:8px;border:none;padding:3px 6px;font-family:Nunito,sans-serif;font-weight:700;font-size:13px;background:rgba(255,255,255,0.9);color:#333">`;
+    def.options.forEach(o => html += `<option value="${o}" ${block.select===o?'selected':''}>${o}</option>`);
+    html += `</select>`;
+  }
+  html += `<button class="del-btn" title="Rimuovi">✕</button>`;
+  el.innerHTML = html;
+
+  // Body zone
+  if (def.hasBody) {
+    const zone = document.createElement('div');
+    zone.className = 'nested-zone';
+    const lbl = document.createElement('div');
+    lbl.className = 'nested-label';
+    lbl.textContent = block.type === 'repeat' ? 'Blocchi dentro al ciclo:' : 'Blocchi se la condizione è vera:';
+    zone.appendChild(lbl);
+    (block.body || []).forEach(inner => zone.appendChild(createBlockEl(inner, true)));
+    // Add inner btn
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-inner-btn';
+    addBtn.innerHTML = '+ Aggiungi blocco qui';
+    addBtn.onclick = (e) => { e.stopPropagation(); showInnerMenu(block.id, zone, addBtn); };
+    zone.appendChild(addBtn);
+    el.appendChild(zone);
+    // Drop
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation();
+      zone.classList.remove('drag-over');
+      const type = e.dataTransfer.getData('block-type');
+      if (type && blockDefs[type] && !blockDefs[type].hasBody) {
+        addInnerBlock(block.id, type);
+      }
+    });
+  }
+
+  // Inputs
+  el.querySelectorAll('[data-field]').forEach(inp => {
+    inp.addEventListener('change', (e) => {
+      updateBlockVal(block.id, inp.dataset.field, e.target.value);
+    });
+  });
+  // Del
+  el.querySelector('.del-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    removeBlock(block.id);
+  });
+  return el;
+}
+
+function adjustColor(hex, amt) {
+  let r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  r=Math.max(0,Math.min(255,r+amt)); g=Math.max(0,Math.min(255,g+amt)); b=Math.max(0,Math.min(255,b+amt));
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+function renderWorkspace() {
+  const list = document.getElementById('block-list');
+  const hint = document.getElementById('drop-hint');
+  list.innerHTML = '';
+  blocks.forEach(b => list.appendChild(createBlockEl(b)));
+  hint.style.display = blocks.length ? 'none' : 'block';
+}
+
+function addBlock(type) {
+  const def = blockDefs[type];
+  const block = { id: ++blockId, type, val: def?.default, text: def?.default, select: def?.options?.[0], body: [] };
+  blocks.push(block);
+  renderWorkspace();
+  setStatus(`Blocco "${def.label}" aggiunto`);
+}
+
+function removeBlock(id) {
+  blocks = blocks.filter(b => b.id !== id);
+  renderWorkspace();
+}
+
+function updateBlockVal(id, field, val) {
+  function update(list) {
+    list.forEach(b => {
+      if (b.id === id) { if(field==='val') b.val=+val; if(field==='text') b.text=val; if(field==='select') b.select=val; }
+      if (b.body) update(b.body);
+    });
+  }
+  update(blocks);
+}
+
+function addInnerBlock(parentId, type) {
+  const def = blockDefs[type];
+  const inner = { id: ++blockId, type, val: def?.default, text: def?.default, select: def?.options?.[0], body: [] };
+  function add(list) { list.forEach(b => { if(b.id===parentId) b.body.push(inner); if(b.body) add(b.body); }); }
+  add(blocks);
+  renderWorkspace();
+}
+
+function showInnerMenu(parentId, zone, btn) {
+  const existing = document.getElementById('inner-menu');
+  if (existing) existing.remove();
+  const menu = document.createElement('div');
+  menu.id = 'inner-menu';
+  menu.style.cssText = 'position:fixed;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.2);padding:8px;z-index:1000;display:flex;flex-direction:column;gap:5px;';
+  const simpleTypes = ['move','turnL','turnR','home','color','say','wait'];
+  simpleTypes.forEach(t => {
+    const def = blockDefs[t];
+    const b = document.createElement('button');
+    b.style.cssText = `border-radius:8px;border:none;padding:7px 12px;background:${def.color};color:${def.textColor||'white'};font-family:Nunito,sans-serif;font-weight:700;font-size:12px;cursor:pointer;text-align:left;`;
+    b.textContent = def.label;
+    b.onclick = () => { addInnerBlock(parentId, t); menu.remove(); };
+    menu.appendChild(b);
+  });
+  const rect = btn.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 4) + 'px';
+  menu.style.left = rect.left + 'px';
+  document.body.appendChild(menu);
+  document.addEventListener('click', () => menu.remove(), { once: true });
+}
+
+// ========== DRAG & DROP ==========
+document.querySelectorAll('.block-template').forEach(btn => {
+  btn.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('block-type', btn.dataset.type);
+  });
+  btn.addEventListener('click', () => addBlock(btn.dataset.type));
+});
+
+const dropZone = document.getElementById('workspace-drop');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const type = e.dataTransfer.getData('block-type');
+  if (type) addBlock(type);
+});
+
+// ========== EXECUTION ==========
+function delay(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function executeBlocks(blockList) {
+  for (const b of blockList) {
+    if (stopFlag) break;
+    // highlight
+    const el = document.querySelector(`[data-id="${b.id}"]`);
+    if (el) { el.classList.add('active-block'); clearCanvas(); drawTurtle(); }
+
+    const speed = 1000 - parseInt(document.getElementById('speed-slider').value);
+
+    switch(b.type) {
+      case 'move':
+        moveTurtle(b.val || 50);
+        log(`➡️ Avanza di ${b.val} passi`);
+        await delay(speed);
+        break;
+      case 'turnL':
+        rotateTurtle(-(b.val || 90));
+        log(`↺ Gira a sinistra di ${b.val}°`);
+        await delay(speed);
+        break;
+      case 'turnR':
+        rotateTurtle(b.val || 90);
+        log(`↻ Gira a destra di ${b.val}°`);
+        await delay(speed);
+        break;
+      case 'home':
+        homePosition();
+        log('🏠 Torna al centro');
+        await delay(speed);
+        break;
+      case 'color':
+        turtle.penColor = COLORS[b.select] || '#333';
+        log(`🎨 Colore penna: ${b.select}`);
+        drawTurtle();
+        await delay(speed);
+        break;
+      case 'say':
+        log(`💬 "${b.text}"`, 'log-say');
+        await showSpeech(b.text || '...', Math.max(1000, speed * 2));
+        break;
+      case 'wait':
+        log(`⏳ Aspetta ${b.val} secondi...`);
+        await delay((b.val || 1) * 1000);
+        break;
+      case 'repeat':
+        const times = b.val || 4;
+        log(`🔁 Inizia ciclo: ripeti ${times} volte`);
+        for (let i = 0; i < times; i++) {
+          if (stopFlag) break;
+          log(`   → Giro ${i+1} di ${times}`, 'log-info');
+          await executeBlocks(b.body || []);
+        }
+        log(`🔁 Fine ciclo`);
+        break;
+      case 'if':
+        const condColor = COLORS[b.select];
+        const match = turtle.penColor === condColor;
+        log(`❓ Il colore è ${b.select}? → ${match ? '✅ Sì!' : '❌ No'}`);
+        if (match) {
+          log(`   → Condizione vera, eseguo i blocchi...`, 'log-info');
+          await executeBlocks(b.body || []);
+        }
+        break;
+    }
+    if (el) el.classList.remove('active-block');
+    await delay(40);
+  }
+}
+
+async function runProgram() {
+  if (isRunning) return;
+  if (blocks.length === 0) { log('⚠️ Nessun blocco nel programma!', 'log-err'); return; }
+  isRunning = true;
+  stopFlag = false;
+  clearConsole();
+  clearCanvas();
+  turtle = { x: 130, y: 130, angle: 0, penColor: '#7c4dff', penDown: true };
+  log('▶️ Programma avviato!', 'log-info');
+  setStatus('In esecuzione...');
+  try {
+    await executeBlocks(blocks);
+  } catch(e) { log('❌ Errore: ' + e.message, 'log-err'); }
+  isRunning = false;
+  log(stopFlag ? '⏹ Programma fermato.' : '✅ Programma completato!', 'log-info');
+  setStatus('Pronto');
+}
+
+function stopProgram() {
+  stopFlag = true;
+  isRunning = false;
+  setStatus('Fermato');
+}
+
+function clearWorkspace() {
+  blocks = [];
+  blockId = 0;
+  renderWorkspace();
+  clearCanvas();
+  clearConsole();
+  log('🗑 Area di lavoro svuotata.', 'log-info');
+  setStatus('Pronto');
+}
+
+function setStatus(msg) {
+  document.getElementById('status-bar').textContent = msg;
+}
+
+// ========== EXAMPLE ==========
+function loadExample() {
+  clearWorkspace();
+  // Example: draw a square
+  const repeatBlock = { id: ++blockId, type: 'repeat', val: 4, body: [
+    { id: ++blockId, type: 'move', val: 60 },
+    { id: ++blockId, type: 'turnR', val: 90 },
+  ]};
+  const sayBlock = { id: ++blockId, type: 'say', text: 'Ho disegnato un quadrato! 🎉' };
+  blocks = [
+    { id: ++blockId, type: 'color', select: 'blu' },
+    repeatBlock,
+    sayBlock
+  ];
+  renderWorkspace();
+  log('💡 Esempio caricato: disegna un quadrato!', 'log-info');
+}
+
+// Init
+renderWorkspace();
+</script>
+</body>
+</html>
